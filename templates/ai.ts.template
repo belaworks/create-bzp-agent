@@ -1,18 +1,16 @@
-import { createAzure } from "@ai-sdk/azure";
+import { createOllama } from "@ai-sdk/ollama";
 import { generateObject } from "ai";
 import { {{promptName}}, {{schemaName}} } from "./prompt";
 
-const azure = createAzure({
-  apiVersion: process.env.AZURE_OPENAI_VERSION,
-  resourceName: process.env.AZURE_OPENAI_RESOURCE_NAME,
-  apiKey: process.env.AZURE_OPENAI_API_KEY,
-  baseURL: process.env.AZURE_OPENAI_ENDPOINT,
-  useDeploymentBasedUrls: true,
+const ollama = createOllama({
+  baseURL: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
 });
+
+const model = process.env.OLLAMA_MODEL || "llama3.2:1b";
 
 export const {{agentFunction}} = async (input: string) => {
   const result = await generateObject({
-    model: azure("gpt-4o-mini"),
+    model: ollama(model),
     schema: {{schemaName}},
     system: {{promptName}},
     messages: [

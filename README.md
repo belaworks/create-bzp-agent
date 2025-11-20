@@ -2,6 +2,8 @@
 
 A simple CLI tool to generate boilerplate code for AI agent applications using Fastify, AI SDK, and Zod.
 
+**✨ Seamless Experience**: Automatically sets up Ollama with a lightweight model (llama3.2:1b) so you can start building immediately without API keys!
+
 ## Installation & Usage
 
 ### Run from GitHub (no installation needed)
@@ -55,23 +57,45 @@ The CLI generates the following structure:
 └── .gitignore         # Git ignore file
 ```
 
+## What Happens When You Run It
+
+The CLI will:
+1. ✅ Generate all boilerplate files
+2. 🔍 Check if Ollama is installed (optional but recommended)
+3. 📥 Pull the `llama3.2:1b` model (if Ollama is available)
+4. 📦 Install dependencies automatically
+5. 🎉 Your agent is ready to run!
+
 ## Next Steps
 
 After generating:
 
 ```bash
 cd <name>-agent
-cp .env.example .env
-# Edit .env with your API keys
-pnpm install
 pnpm dev
 ```
+
+That's it! Your agent runs on `http://localhost:3000` using Ollama locally.
+
+**Note**: If Ollama isn't installed, the project still works. You can:
+- Install Ollama later: https://ollama.ai
+- Or configure Azure OpenAI/OpenAI in `.env`
 
 ## Stack
 
 - **Fastify** - Web server framework
-- **AI SDK** - AI model integration (Azure OpenAI)
+- **AI SDK** - AI model integration
+- **Ollama** - Local AI models (default, no API keys needed!)
 - **Zod** - Schema validation
 - **dotenv** - Environment variable management
 - **TypeScript** - Type safety
+
+## Model Options
+
+By default, the generated agent uses **Ollama with llama3.2:1b** (lightweight, runs locally).
+
+You can also configure:
+- **Azure OpenAI** - Set `AZURE_OPENAI_*` in `.env`
+- **OpenAI** - Set `OPENAI_API_KEY` in `.env`
+- **Other Ollama models** - Change `OLLAMA_MODEL` in `.env`
 
