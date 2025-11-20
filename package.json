@@ -1,0 +1,31 @@
+{
+  "name": "create-bzp-agent",
+  "version": "1.0.0",
+  "description": "CLI tool to generate agent application boilerplate",
+  "type": "module",
+  "main": "index.ts",
+  "bin": {
+    "create-bzp-agent": "./bin/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx index.ts"
+  },
+  "keywords": ["cli", "boilerplate", "agent", "ai"],
+  "author": "",
+  "license": "ISC",
+  "files": [
+    "bin",
+    "index.ts",
+    "templates",
+    "package.json",
+    "README.md"
+  ],
+  "dependencies": {
+    "tsx": "^4.20.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
+

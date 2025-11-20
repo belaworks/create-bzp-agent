@@ -1,0 +1,27 @@
+import fastify from "fastify";
+import { {{InputType}} } from "./types";
+import { {{agentFunction}} } from "./ai";
+import "dotenv/config";
+
+const server = fastify({
+  logger: true,
+});
+
+server.post("/", async (req, res) => {
+  const body = req.body as {{InputType}};
+  if (!body.{{inputField}}) {
+    return res.status(400).send({ error: "{{inputField}} is required" });
+  }
+
+  const result = await {{agentFunction}}(body.{{inputField}});
+  res.status(201).send(result);
+});
+
+server.listen({ port: Number(process.env.PORT ?? 3000) }, (err, address) => {
+  if (err) {
+    server.log.error(err);
+    process.exit(1);
+  }
+  server.log.info(`Server is running on ${address}`);
+});
+
