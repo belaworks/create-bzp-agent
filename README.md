@@ -1,27 +1,21 @@
 # create-bzp-agent
 
-A simple CLI tool to generate boilerplate code for AI agent applications using Fastify, AI SDK, and Zod.
+A simple CLI tool to generate boilerplate code for AI agent applications using Fastify, AI SDK, and Ollama.
 
 **✨ Seamless Experience**: Automatically sets up Ollama with a lightweight model (qwen:0.5b) so you can start building immediately without API keys!
 
 ## Installation & Usage
 
-### Run from GitHub (no installation needed)
+### Run with npx (no installation needed)
 
 ```bash
-npx github:your-username/create-bzp-agent <name-of-the-agent>
+npx create-bzp-agent <name-of-the-agent>
 ```
 
 ### Install globally
 
 ```bash
-npm install -g github:your-username/create-bzp-agent
-create-bzp-agent <name-of-the-agent>
-```
-
-### Or use directly
-
-```bash
+npm install -g create-bzp-agent
 create-bzp-agent <name-of-the-agent>
 ```
 
@@ -86,7 +80,6 @@ That's it! Your agent runs on `http://localhost:8090` using Ollama locally.
 - **Fastify** - Web server framework
 - **AI SDK** - AI model integration
 - **Ollama** - Local AI models (default, no API keys needed!)
-- **Zod** - Schema validation
 - **dotenv** - Environment variable management
 - **TypeScript** - Type safety
 

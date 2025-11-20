@@ -1,7 +1,7 @@
 {
   "name": "create-bzp-agent",
   "version": "1.0.0",
-  "description": "CLI tool to generate agent application boilerplate",
+  "description": "CLI tool to generate agent application boilerplate with Fastify, AI SDK, and Zod",
   "type": "module",
   "main": "index.ts",
   "bin": {
@@ -10,8 +10,17 @@
   "scripts": {
     "dev": "tsx index.ts"
   },
-  "keywords": ["cli", "boilerplate", "agent", "ai"],
-  "author": "",
+  "keywords": ["cli", "ai-sdk", "agent", "ai", "fastify", "zod"],
+  "author": "Leonardo Felicissimo",
+  "repository": "https://github.com/belaworks/create-bzp-agent",
+  "bugs": "https://github.com/belaworks/create-bzp-agent/issues",
+  "contributors": [
+    {
+      "name": "Leonardo Felicissimo",
+      "email": "leomfelicissimo@gmail.com",
+      "url": "https://github.com/leomfelicissimo"
+    }
+  ],
   "license": "ISC",
   "files": [
     "bin",
