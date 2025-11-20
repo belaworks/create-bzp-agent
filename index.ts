@@ -333,8 +333,9 @@ async function main() {
   console.log(`🚀 Creating agent: ${projectName}\n`);
 
   // Check if Ollama is installed
-  const ollamaInstalled = checkCommand("ollama");
+  let ollamaInstalled = checkCommand("ollama");
   let shouldInstallOllama = false;
+  let ollamaSetupComplete = false;
 
   if (!ollamaInstalled) {
     console.log("💡 Ollama enables your agent to run locally without API keys.");
@@ -345,6 +346,9 @@ async function main() {
     if (shouldInstallOllama) {
       try {
         await setupOllama(true);
+        ollamaSetupComplete = true;
+        // Re-check if Ollama is now available
+        ollamaInstalled = checkCommand("ollama");
       } catch (error) {
         console.error("\n⚠️  Ollama installation encountered issues, but continuing with project creation...");
         console.log("   You can install Ollama manually later from https://ollama.ai");
@@ -474,22 +478,24 @@ dist/
 
   console.log(`\n✅ Success! Created ${projectName}\n`);
 
+  // Install dependencies (always do this after file generation)
+  console.log("📦 Installing dependencies...");
+  try {
+    await installDependencies(absoluteOutputDir);
+    console.log("  ✓ Dependencies installed\n");
+  } catch (error) {
+    console.error("\n⚠️  Dependency installation had issues.");
+    console.log("   You can install manually:");
+    console.log(`   cd ${projectName}`);
+    console.log("   pnpm install");
+  }
+
   // Setup Ollama if it wasn't installed earlier (non-blocking)
   let ollamaPromise: Promise<void> | null = null;
   if (ollamaInstalled && !shouldInstallOllama) {
     ollamaPromise = setupOllama(false).catch(() => {
       // Errors are already handled in setupOllama
     });
-  }
-
-  // Install dependencies
-  try {
-    await installDependencies(absoluteOutputDir);
-  } catch (error) {
-    console.error("\n⚠️  Dependency installation had issues.");
-    console.log("   You can install manually:");
-    console.log(`   cd ${projectName}`);
-    console.log("   pnpm install");
   }
 
   // Wait for Ollama setup to complete (or timeout) if it's running
@@ -504,12 +510,23 @@ dist/
     }
   }
 
-  console.log(`\n🎉 Setup complete! Your agent is ready.\n`);
+  console.log(`\n🎉 Setup complete! Your agent is ready to run.\n`);
+  
+  if (ollamaSetupComplete || ollamaInstalled) {
+    console.log("✅ Ollama is installed and configured");
+    console.log("✅ Dependencies are installed");
+    console.log("✅ Your agent is ready to use locally\n");
+  } else {
+    console.log("✅ Dependencies are installed");
+    console.log("⚠️  To run locally, install Ollama: https://ollama.ai\n");
+  }
+  
   console.log("Next steps:");
   console.log(`  cd ${projectName}`);
   console.log("  pnpm dev");
-  console.log("\nYour agent will run on http://localhost:3000");
-  console.log("Make a POST request to / with: { \"input\": \"your message\" }");
+  console.log("\nYour server will start on http://localhost:3000");
+  console.log("The server will wait for requests. Make a POST request to / with:");
+  console.log('  { "input": "your message" }');
 }
 
 main();
