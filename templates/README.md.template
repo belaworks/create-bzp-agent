@@ -1,0 +1,165 @@
+# {{projectName}}
+
+AI Agent built with Fastify, AI SDK, and Ollama.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- pnpm (or npm)
+- Ollama installed and running (if using local models)
+
+### Installation
+
+Dependencies are already installed. If you need to reinstall:
+
+```bash
+pnpm install
+```
+
+### Running the Agent
+
+Start the development server:
+
+```bash
+pnpm dev
+```
+
+The server will start on `http://localhost:8090` and wait for requests.
+
+## Usage
+
+### Making Requests
+
+The agent accepts POST requests to the root endpoint (`/`).
+
+#### Request Format
+
+```bash
+curl -X POST http://localhost:8090 \
+  -H "Content-Type: application/json" \
+  -d '{"input": "Your message here"}'
+```
+
+#### Example
+
+```bash
+curl -X POST http://localhost:8090 \
+  -H "Content-Type: application/json" \
+  -d '{"input": "Hello, how are you?"}'
+```
+
+#### Response
+
+```json
+{
+  "text": "Response from the AI agent..."
+}
+```
+
+### Using with JavaScript/TypeScript
+
+```typescript
+const response = await fetch('http://localhost:8090', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    input: 'Your message here'
+  })
+});
+
+const data = await response.json();
+console.log(data.text);
+```
+
+### Using with Python
+
+```python
+import requests
+
+response = requests.post(
+    'http://localhost:8090',
+    json={'input': 'Your message here'}
+)
+
+print(response.json()['text'])
+```
+
+## Configuration
+
+Edit the `.env` file to configure your AI provider and settings.
+
+### Provider-Specific Settings
+
+#### Ollama
+- `OLLAMA_MODEL` - Model to use (default: qwen:0.5b)
+
+#### OpenAI
+- `OPENAI_API_KEY` - Your OpenAI API key (required)
+- `OPENAI_MODEL` - Model to use (default: gpt-4o-mini)
+
+#### Azure OpenAI
+- `AZURE_OPENAI_API_KEY` - Your Azure API key (required)
+- `AZURE_OPENAI_RESOURCE_NAME` - Your Azure resource name (required)
+- `AZURE_OPENAI_ENDPOINT` - Your Azure endpoint URL (required)
+- `AZURE_OPENAI_VERSION` - API version (default: 2024-02-15-preview)
+- `AZURE_OPENAI_MODEL` - Model deployment name (default: gpt-4o-mini)
+
+### Server Settings
+- `PORT` - Server port (default: 8090)
+
+## Customization
+
+### Updating the System Prompt
+
+Edit `src/prompt.ts` to customize the agent's behavior and instructions.
+
+### Changing the Model
+
+Update the model environment variable in `.env` based on your provider:
+- Ollama: `OLLAMA_MODEL`
+- OpenAI: `OPENAI_MODEL`
+- Azure: `AZURE_OPENAI_MODEL`
+
+## Troubleshooting
+
+### Ollama Provider
+
+**Ollama not responding:**
+```bash
+ollama serve
+```
+
+**Model not found:**
+```bash
+ollama pull qwen:0.5b
+```
+
+### OpenAI Provider
+
+**API key not working:**
+- Verify your `OPENAI_API_KEY` is correct
+- Check your OpenAI account has credits
+
+### Azure OpenAI Provider
+
+**Connection errors:**
+- Verify all Azure credentials are set correctly
+- Check your Azure resource is active
+- Ensure the endpoint URL is correct
+
+### General Issues
+
+**Port already in use:**
+Change the `PORT` in `.env` to use a different port.
+
+**Provider not working:**
+- Verify all required environment variables are set
+- Check the server logs for detailed error messages
+
+## License
+
+ISC

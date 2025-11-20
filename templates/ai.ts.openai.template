@@ -1,0 +1,20 @@
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
+import { {{promptName}} } from "./prompt";
+
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+
+export const {{agentFunction}} = async (input: string) => {
+  const { text } = await generateText({
+    model: openai(model),
+    system: {{promptName}},
+    prompt: input,
+  });
+
+  return { text };
+};
+

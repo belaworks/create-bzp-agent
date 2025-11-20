@@ -1,16 +1,4 @@
-import { z } from "zod";
-
 export const {{promptName}} = `
 You are a helpful AI assistant.
 `;
-
-export const {{schemaName}} = z.object({
-  // Define your output schema here
-  // Example:
-  // result: z.string(),
-  // data: z.object({
-  //   field1: z.string(),
-  //   field2: z.number(),
-  // }),
-});
 

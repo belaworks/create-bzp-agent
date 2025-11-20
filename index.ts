@@ -13,9 +13,9 @@ interface Config {
   projectName: string;
   agentFunction: string;
   promptName: string;
-  schemaName: string;
   inputType: string;
   inputField: string;
+  provider: "ollama" | "openai" | "azure";
 }
 
 function readTemplate(templateName: string): string {
@@ -25,11 +25,12 @@ function readTemplate(templateName: string): string {
 
 function replacePlaceholders(template: string, config: Config): string {
   return template
+    .replace(/\{\{projectName\}\}/g, config.projectName)
     .replace(/\{\{agentFunction\}\}/g, config.agentFunction)
     .replace(/\{\{promptName\}\}/g, config.promptName)
-    .replace(/\{\{schemaName\}\}/g, config.schemaName)
     .replace(/\{\{InputType\}\}/g, config.inputType)
-    .replace(/\{\{inputField\}\}/g, config.inputField);
+    .replace(/\{\{inputField\}\}/g, config.inputField)
+    .replace(/\{\{provider\}\}/g, config.provider);
 }
 
 function toPascalCase(str: string): string {
@@ -67,6 +68,26 @@ function promptUser(question: string): Promise<string> {
       resolve(answer.trim().toLowerCase());
     });
   });
+}
+
+async function promptProvider(): Promise<"ollama" | "openai" | "azure"> {
+  console.log("\n🤖 Which AI provider would you like to use?\n");
+  console.log("  1) Ollama (local, no API keys needed)");
+  console.log("  2) OpenAI (requires API key)");
+  console.log("  3) Azure OpenAI (requires Azure credentials)\n");
+  
+  while (true) {
+    const answer = await promptUser("Select provider (1-3): ");
+    if (answer === "1" || answer === "ollama") {
+      return "ollama";
+    } else if (answer === "2" || answer === "openai") {
+      return "openai";
+    } else if (answer === "3" || answer === "azure") {
+      return "azure";
+    } else {
+      console.log("  ⚠️  Please enter 1, 2, or 3");
+    }
+  }
 }
 
 function detectPlatform(): "macos" | "linux" | "windows" | "unknown" {
@@ -156,7 +177,8 @@ async function startOllamaService(): Promise<void> {
     // Service is not running, try to start it
   }
 
-  console.log("  Starting Ollama service...");
+  console.log("  🔄 Starting Ollama service...");
+  console.log("     This may take a few seconds...");
 
   // On macOS/Linux, try to start in background
   const platform = detectPlatform();
@@ -240,7 +262,7 @@ async function setupOllama(shouldInstall: boolean = false): Promise<void> {
         console.log("\n⚠️  Ollama installation was not completed.");
         console.log("   Your project has been created, but you'll need to install Ollama manually");
         console.log("   to run the agent locally. Visit https://ollama.ai to download.");
-        console.log("   After installation, you can pull the model with: ollama pull llama3.2:1b");
+        console.log("   After installation, you can pull the model with: ollama pull qwen:0.5b");
         return;
       }
 
@@ -250,7 +272,7 @@ async function setupOllama(shouldInstall: boolean = false): Promise<void> {
       // Verify installation
       if (!checkCommand("ollama")) {
         console.log("\n⚠️  Ollama installation completed but command not found.");
-        console.log("   Please restart your terminal and run: ollama pull llama3.2:1b");
+        console.log("   Please restart your terminal and run: ollama pull qwen:0.5b");
         return;
       }
 
@@ -265,20 +287,21 @@ async function setupOllama(shouldInstall: boolean = false): Promise<void> {
   }
 
   // Start Ollama service
+  console.log("  Checking service status...");
   try {
     await startOllamaService();
   } catch (error) {
     console.log("\n⚠️  Could not start Ollama service automatically.");
     console.log("   Please start it manually with: ollama serve");
-    console.log("   Then pull the model with: ollama pull llama3.2:1b");
+    console.log("   Then pull the model with: ollama pull qwen:0.5b");
     return;
   }
 
   // Check if model already exists
   try {
     const output = execSync("ollama list", { encoding: "utf-8" });
-    if (output.includes("llama3.2:1b")) {
-      console.log("  ✓ Model llama3.2:1b is already available");
+    if (output.includes("qwen:0.5b")) {
+      console.log("  ✓ Model qwen:0.5b is already available");
       return;
     }
   } catch {
@@ -286,21 +309,23 @@ async function setupOllama(shouldInstall: boolean = false): Promise<void> {
   }
 
   // Pull the model
-  const model = "llama3.2:1b";
+  const model = "qwen:0.5b";
   console.log(`\n📥 Pulling model: ${model}...`);
-  console.log("   (This may take a few minutes on first run)");
+  console.log("   This may take a few minutes on first run");
+  console.log("   Please wait, downloading model...\n");
 
   try {
     await runCommand("ollama", ["pull", model]);
-    console.log(`  ✓ Model ${model} is ready`);
+    console.log(`\n  ✓ Model ${model} is ready`);
   } catch (error) {
-    console.error(`  ⚠️  Failed to pull model automatically`);
-    console.log("   You can pull it manually later with: ollama pull llama3.2:1b");
+    console.error(`\n  ⚠️  Failed to pull model automatically`);
+    console.log("   You can pull it manually later with: ollama pull qwen:0.5b");
   }
 }
 
 async function installDependencies(projectDir: string): Promise<void> {
   console.log("\n📦 Installing dependencies...");
+  console.log("   This may take a minute or two...\n");
 
   // Check if pnpm is available
   const pnpmAvailable = checkCommand("pnpm");
@@ -308,9 +333,9 @@ async function installDependencies(projectDir: string): Promise<void> {
 
   try {
     await runCommand(packageManager, ["install"], projectDir);
-    console.log(`  ✓ Dependencies installed with ${packageManager}`);
+    console.log(`\n  ✓ Dependencies installed with ${packageManager}\n`);
   } catch (error) {
-    console.error(`  ❌ Failed to install dependencies: ${error}`);
+    console.error(`\n  ❌ Failed to install dependencies: ${error}`);
     console.log(`   Please run manually: cd ${path.basename(projectDir)} && ${packageManager} install`);
   }
 }
@@ -332,29 +357,39 @@ async function main() {
   
   console.log(`🚀 Creating agent: ${projectName}\n`);
 
-  // Check if Ollama is installed
-  let ollamaInstalled = checkCommand("ollama");
+  // Ask user to select AI provider
+  const provider = await promptProvider();
+  console.log(`\n  ✓ Selected provider: ${provider}\n`);
+
+  // Check if Ollama is installed (only if Ollama provider selected)
+  let ollamaInstalled = false;
   let shouldInstallOllama = false;
   let ollamaSetupComplete = false;
 
-  if (!ollamaInstalled) {
-    console.log("💡 Ollama enables your agent to run locally without API keys.");
-    console.log("   Your agent will be ready to run immediately after setup.\n");
-    const answer = await promptUser("Would you like to install Ollama now? (y/N): ");
-    shouldInstallOllama = answer === "y" || answer === "yes";
-    
-    if (shouldInstallOllama) {
-      try {
-        await setupOllama(true);
-        ollamaSetupComplete = true;
-        // Re-check if Ollama is now available
-        ollamaInstalled = checkCommand("ollama");
-      } catch (error) {
-        console.error("\n⚠️  Ollama installation encountered issues, but continuing with project creation...");
-        console.log("   You can install Ollama manually later from https://ollama.ai");
+  if (provider === "ollama") {
+    ollamaInstalled = checkCommand("ollama");
+
+    if (!ollamaInstalled) {
+      console.log("💡 Ollama enables your agent to run locally without API keys.");
+      console.log("   Your agent will be ready to run immediately after setup.\n");
+      const answer = await promptUser("Would you like to install Ollama now? (y/N): ");
+      shouldInstallOllama = answer === "y" || answer === "yes";
+      
+      if (shouldInstallOllama) {
+        try {
+          await setupOllama(true);
+          ollamaSetupComplete = true;
+          // Re-check if Ollama is now available
+          ollamaInstalled = checkCommand("ollama");
+        } catch (error) {
+          console.error("\n⚠️  Ollama installation encountered issues, but continuing with project creation...");
+          console.log("   You can install Ollama manually later from https://ollama.ai");
+        }
+      } else {
+        console.log("\n   Skipping Ollama installation. You can install it later if needed.");
       }
     } else {
-      console.log("\n   Skipping Ollama installation. You can install it later if needed.");
+      ollamaInstalled = true;
     }
   }
 
@@ -363,9 +398,9 @@ async function main() {
     projectName,
     agentFunction: toCamelCase(baseName),
     promptName: `${toCamelCase(baseName)}Prompt`,
-    schemaName: `${toCamelCase(baseName)}Schema`,
     inputType: `${toPascalCase(baseName)}Request`,
     inputField: "input",
+    provider,
   };
 
   const absoluteOutputDir = path.resolve(projectName);
@@ -386,8 +421,9 @@ async function main() {
     { template: "server.ts", output: path.join("src", "server.ts") },
     { template: "prompt.ts", output: path.join("src", "prompt.ts") },
     { template: "types.ts", output: path.join("src", "types.ts") },
-    { template: "ai.ts", output: path.join("src", "ai.ts") },
+    { template: `ai.ts.${provider}`, output: path.join("src", "ai.ts") },
     { template: "env.example", output: ".env.example" },
+    { template: "README.md", output: "README.md" },
   ];
 
   console.log("📝 Generating files...\n");
@@ -400,7 +436,21 @@ async function main() {
     console.log(`  ✓ ${file.output}`);
   }
 
-  // Generate package.json
+  // Generate package.json with conditional dependencies
+  const dependencies: Record<string, string> = {
+    "ai": "^5.0.93",
+    "dotenv": "^17.2.3",
+    "fastify": "^5.6.2",
+  };
+
+  if (provider === "ollama") {
+    dependencies["ollama-ai-provider-v2"] = "latest";
+  } else if (provider === "openai") {
+    dependencies["@ai-sdk/openai"] = "^2.0.68";
+  } else if (provider === "azure") {
+    dependencies["@ai-sdk/azure"] = "^2.0.70";
+  }
+
   const packageJson = {
     name: projectName,
     version: "1.0.0",
@@ -418,15 +468,7 @@ async function main() {
       "tsx": "^4.20.6",
       "typescript": "^5.9.3",
     },
-    dependencies: {
-      "@ai-sdk/ollama": "^0.0.30",
-      "@ai-sdk/azure": "^2.0.70",
-      "@ai-sdk/openai": "^2.0.68",
-      "ai": "^5.0.93",
-      "dotenv": "^17.2.3",
-      "fastify": "^5.6.2",
-      "zod": "^4.1.12",
-    },
+    dependencies,
   };
   fs.writeFileSync(
     path.join(absoluteOutputDir, "package.json"),
@@ -478,8 +520,6 @@ dist/
 
   console.log(`\n✅ Success! Created ${projectName}\n`);
 
-  // Install dependencies (always do this after file generation)
-  console.log("📦 Installing dependencies...");
   try {
     await installDependencies(absoluteOutputDir);
     console.log("  ✓ Dependencies installed\n");
@@ -490,16 +530,16 @@ dist/
     console.log("   pnpm install");
   }
 
-  // Setup Ollama if it wasn't installed earlier (non-blocking)
+  // Setup Ollama if it wasn't installed earlier (only if Ollama provider selected)
   let ollamaPromise: Promise<void> | null = null;
-  if (ollamaInstalled && !shouldInstallOllama) {
+  if (provider === "ollama" && ollamaInstalled && !shouldInstallOllama) {
     ollamaPromise = setupOllama(false).catch(() => {
       // Errors are already handled in setupOllama
     });
   }
 
   // Wait for Ollama setup to complete (or timeout) if it's running
-  if (ollamaPromise) {
+  if (ollamaPromise && shouldInstallOllama) {
     try {
       await Promise.race([
         ollamaPromise,
@@ -512,22 +552,31 @@ dist/
 
   console.log(`\n🎉 Setup complete! Your agent is ready to run.\n`);
   
-  if (ollamaSetupComplete || ollamaInstalled) {
-    console.log("✅ Ollama is installed and configured");
+  if (provider === "ollama") {
+    if (ollamaSetupComplete || ollamaInstalled) {
+      console.log("✅ Ollama is installed and configured");
+      console.log("✅ Dependencies are installed");
+      console.log("✅ Your agent is ready to use locally\n");
+    } else {
+      console.log("✅ Dependencies are installed");
+      console.log("⚠️  To run locally, install Ollama: https://ollama.ai\n");
+    }
+  } else if (provider === "openai") {
     console.log("✅ Dependencies are installed");
-    console.log("✅ Your agent is ready to use locally\n");
-  } else {
+    console.log("⚠️  Don't forget to set OPENAI_API_KEY in your .env file\n");
+  } else if (provider === "azure") {
     console.log("✅ Dependencies are installed");
-    console.log("⚠️  To run locally, install Ollama: https://ollama.ai\n");
+    console.log("⚠️  Don't forget to set Azure OpenAI credentials in your .env file\n");
   }
   
+  console.log("🤖 Setup complete! Your agent is ready to run.");
   console.log("Next steps:");
   console.log(`  cd ${projectName}`);
   console.log("  pnpm dev");
-  console.log("\nYour server will start on http://localhost:3000");
-  console.log("The server will wait for requests. Make a POST request to / with:");
-  console.log('  { "input": "your message" }');
+  console.log("\nYour server will start on http://localhost:8090");
+  console.log("Here is a sample command to make a POST request to the agent:");
+  console.log('  curl -X POST http://localhost:8090 -H "Content-Type: application/json" -d \'{"input": "your message"}\'');
 }
 
-main();
+main()
 

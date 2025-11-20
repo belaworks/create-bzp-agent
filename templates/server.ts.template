@@ -17,11 +17,10 @@ server.post("/", async (req, res) => {
   res.status(201).send(result);
 });
 
-server.listen({ port: Number(process.env.PORT ?? 3000) }, (err, address) => {
+server.listen({ port: Number(process.env.PORT ?? 8090) }, (err) => {
   if (err) {
     server.log.error(err);
     process.exit(1);
   }
-  server.log.info(`Server is running on ${address}`);
 });
 

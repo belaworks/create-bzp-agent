@@ -1,0 +1,24 @@
+import { createAzure } from "@ai-sdk/azure";
+import { generateText } from "ai";
+import { {{promptName}} } from "./prompt";
+
+const azure = createAzure({
+  apiVersion: process.env.AZURE_OPENAI_VERSION || "2024-02-15-preview",
+  resourceName: process.env.AZURE_OPENAI_RESOURCE_NAME!,
+  apiKey: process.env.AZURE_OPENAI_API_KEY!,
+  baseURL: process.env.AZURE_OPENAI_ENDPOINT,
+  useDeploymentBasedUrls: true,
+});
+
+const model = process.env.AZURE_OPENAI_MODEL || "gpt-4o-mini";
+
+export const {{agentFunction}} = async (input: string) => {
+  const { text } = await generateText({
+    model: azure(model),
+    system: {{promptName}},
+    prompt: input,
+  });
+
+  return { text };
+};
+

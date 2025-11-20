@@ -2,7 +2,7 @@
 
 A simple CLI tool to generate boilerplate code for AI agent applications using Fastify, AI SDK, and Zod.
 
-**✨ Seamless Experience**: Automatically sets up Ollama with a lightweight model (llama3.2:1b) so you can start building immediately without API keys!
+**✨ Seamless Experience**: Automatically sets up Ollama with a lightweight model (qwen:0.5b) so you can start building immediately without API keys!
 
 ## Installation & Usage
 
@@ -62,7 +62,7 @@ The CLI generates the following structure:
 The CLI will:
 1. ✅ Generate all boilerplate files
 2. 🔍 Check if Ollama is installed (optional but recommended)
-3. 📥 Pull the `llama3.2:1b` model (if Ollama is available)
+3. 📥 Pull the `qwen:0.5b` model (if Ollama is available)
 4. 📦 Install dependencies automatically
 5. 🎉 Your agent is ready to run!
 
@@ -75,7 +75,7 @@ cd <name>-agent
 pnpm dev
 ```
 
-That's it! Your agent runs on `http://localhost:3000` using Ollama locally.
+That's it! Your agent runs on `http://localhost:8090` using Ollama locally.
 
 **Note**: If Ollama isn't installed, the project still works. You can:
 - Install Ollama later: https://ollama.ai
@@ -92,7 +92,7 @@ That's it! Your agent runs on `http://localhost:3000` using Ollama locally.
 
 ## Model Options
 
-By default, the generated agent uses **Ollama with llama3.2:1b** (lightweight, runs locally).
+By default, the generated agent uses **Ollama with qwen:0.5b** (lightweight, runs locally).
 
 You can also configure:
 - **Azure OpenAI** - Set `AZURE_OPENAI_*` in `.env`

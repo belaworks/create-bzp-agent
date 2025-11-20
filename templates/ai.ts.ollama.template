@@ -1,0 +1,16 @@
+import { ollama } from "ollama-ai-provider-v2";
+import { generateText } from "ai";
+import { {{promptName}} } from "./prompt";
+
+const model = process.env.OLLAMA_MODEL || "qwen:0.5b";
+
+export const {{agentFunction}} = async (input: string) => {
+  const { text } = await generateText({
+    model: ollama(model),
+    system: {{promptName}},
+    prompt: input,
+  });
+
+  return { text };
+};
+
